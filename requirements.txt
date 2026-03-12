@@ -1,0 +1,7 @@
+django>=4.2
+anthropic
+chromadb
+sentence-transformers
+PyMuPDF
+python-dotenv
+whitenoise

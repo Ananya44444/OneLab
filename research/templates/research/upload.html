@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}— Research{% endblock title %}
+{% block nav_research %}text-white font-medium{% endblock nav_research %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- ── UPLOAD ── -->
+  <div class="lg:col-span-2 rounded-2xl border border-teal-700/50 overflow-hidden" style="background:rgba(10,61,58,0.7)">
+
+    <div class="px-6 py-5" style="border-bottom:1px solid rgba(15,118,110,0.4)">
+      <p class="font-semibold text-white">Paper Ingestion</p>
+      <p class="text-xs text-teal-400 mt-0.5">PDF → chunk → embed → ChromaDB</p>
+    </div>
+
+    <div class="p-6 space-y-5">
+
+      <form id="uploadForm" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Drop zone -->
+        <label id="dropZone"
+          class="dropzone-label flex flex-col items-center justify-center gap-2 w-full py-12
+                 border-2 border-dashed rounded-xl cursor-pointer transition-all"
+          style="border-color:rgba(15,118,110,0.5)">
+          <svg class="w-8 h-8 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+          <p class="text-sm text-teal-300">Drop a PDF or <span class="text-orange-400 underline">browse</span></p>
+          <p id="fileLabel" class="text-xs text-teal-500">No file selected</p>
+          <input id="pdfInput" type="file" name="pdf" accept="application/pdf" class="hidden" required />
+        </label>
+
+        <!-- Progress -->
+        <div id="progressWrap" class="hidden">
+          <div class="flex justify-between text-xs text-teal-400 mb-1.5">
+            <span id="progressLabel">Processing…</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="h-1 rounded-full overflow-hidden" style="background:rgba(15,118,110,0.3)">
+            <div id="progressBar"
+              class="h-1 rounded-full transition-all duration-500" style="width:0%;background:#ea580c"></div>
+          </div>
+        </div>
+
+        <button id="uploadBtn" disabled
+          class="w-full py-2.5 rounded-xl text-sm font-medium transition-colors text-white disabled:opacity-30"
+          style="background:#ea580c">
+          Upload &amp; Index
+        </button>
+      </form>
+
+      <!-- Result -->
+      <div id="resultPanel" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-medium text-teal-100">Ingestion complete</p>
+          <span id="chunkBadge"
+            class="text-xs text-orange-300 border border-orange-600/50 px-2 py-0.5 rounded-full"
+            style="background:rgba(124,45,18,0.3)"></span>
+        </div>
+        <div class="rounded-xl p-4" style="background:rgba(5,38,36,0.6);border:1px solid rgba(15,118,110,0.4)">
+          <p class="text-xs text-teal-400 uppercase tracking-wide mb-2">Summary</p>
+          <p id="summaryText" class="text-sm text-teal-100 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="errorPanel" class="hidden rounded-xl bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-400">
+        <span class="font-medium">Error — </span><span id="errorText"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── HISTORY ── -->
+  <div class="rounded-2xl border border-teal-700/50 overflow-hidden" style="background:rgba(10,61,58,0.7)">
+
+    <div class="px-6 py-5" style="border-bottom:1px solid rgba(15,118,110,0.4)">
+      <p class="font-semibold text-white">Documents</p>
+      <p class="text-xs text-teal-400 mt-0.5">Indexed in ChromaDB</p>
+    </div>
+
+    <ul class="overflow-y-auto max-h-[60vh]" style="divide-color:rgba(15,118,110,0.2)">
+      {% for d in documents %}
+      <li class="px-6 py-3.5 transition-colors" style="border-bottom:1px solid rgba(15,118,110,0.2)"
+          onmouseover="this.style.background='rgba(15,118,110,0.15)'" onmouseout="this.style.background=''">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm text-teal-100 truncate">{{ d.title }}</p>
+            <p class="text-xs text-teal-500 mt-0.5">{{ d.uploaded_at|date:"M d · H:i" }}</p>
+          </div>
+          {% if d.status == "processed" %}
+          <span class="shrink-0 text-xs text-green-400 bg-green-950 border border-green-800 px-2 py-0.5 rounded-full">indexed</span>
+          {% elif d.status == "processing" %}
+          <span class="shrink-0 text-xs text-amber-400 bg-amber-950 border border-amber-800 px-2 py-0.5 rounded-full">processing</span>
+          {% else %}
+          <span class="shrink-0 text-xs text-red-400 bg-red-950 border border-red-800 px-2 py-0.5 rounded-full">{{ d.status }}</span>
+          {% endif %}
+        </div>
+      </li>
+      {% empty %}
+      <li class="px-6 py-12 text-center">
+        <p class="text-sm text-teal-500">No uploads yet</p>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <style>
+    .dropzone-label:hover { border-color: rgba(251,146,60,0.5) !important; background: rgba(124,45,18,0.1); }
+    #uploadBtn:hover:not(:disabled) { background: #f97316 !important; }
+  </style>
+
+</div>
+
+<script>
+  const pdfInput    = document.getElementById("pdfInput");
+  const fileLabel   = document.getElementById("fileLabel");
+  const uploadBtn   = document.getElementById("uploadBtn");
+  const progressWrap= document.getElementById("progressWrap");
+  const progressBar = document.getElementById("progressBar");
+  const progressPct = document.getElementById("progressPct");
+  const progressLbl = document.getElementById("progressLabel");
+  const resultPanel = document.getElementById("resultPanel");
+  const summaryText = document.getElementById("summaryText");
+  const chunkBadge  = document.getElementById("chunkBadge");
+  const errorPanel  = document.getElementById("errorPanel");
+  const errorText   = document.getElementById("errorText");
+  const form        = document.getElementById("uploadForm");
+
+  pdfInput.addEventListener("change", () => {
+    const f = pdfInput.files[0];
+    if (f) { fileLabel.textContent = f.name; uploadBtn.disabled = false; }
+  });
+
+  function setProgress(pct, label) {
+    progressBar.style.width = pct + "%";
+    progressPct.textContent = pct + "%";
+    progressLbl.textContent = label;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    resultPanel.classList.add("hidden");
+    errorPanel.classList.add("hidden");
+    progressWrap.classList.remove("hidden");
+    uploadBtn.disabled = true;
+    setProgress(10, "Extracting text…");
+
+    const formData   = new FormData(form);
+    const csrfToken  = form.querySelector("[name=csrfmiddlewaretoken]").value;
+    const steps      = [[30,"Chunking…"],[55,"Embedding…"],[75,"Storing in ChromaDB…"]];
+    let   t          = 0;
+    const ticker     = setInterval(() => {
+      if (t < steps.length) { setProgress(...steps[t]); t++; }
+    }, 900);
+
+    try {
+      const res  = await fetch("/research/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+        body: formData
+      });
+      clearInterval(ticker);
+      const data = await res.json();
+      if (data.error) {
+        progressWrap.classList.add("hidden");
+        errorPanel.classList.remove("hidden");
+        errorText.textContent = data.error;
+      } else {
+        setProgress(100, "Done");
+        setTimeout(() => {
+          progressWrap.classList.add("hidden");
+          chunkBadge.textContent = data.chunks_indexed + " chunks";
+          summaryText.textContent = data.summary;
+          resultPanel.classList.remove("hidden");
+        }, 400);
+      }
+    } catch (err) {
+      clearInterval(ticker);
+      progressWrap.classList.add("hidden");
+      errorPanel.classList.remove("hidden");
+      errorText.textContent = err.message;
+    } finally {
+      uploadBtn.disabled = false;
+    }
+  });
+</script>
+{% endblock content %}
