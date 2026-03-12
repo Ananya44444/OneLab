@@ -1,4 +1,4 @@
-# ScholarCore MVP - GSoC 2026 proof of concept
+# OneLab MVP - GSoC 2026 proof of concept
 
 OneLab demonstrates a minimal but production-minded architecture for an AI-powered personalized learning + research assistant.
 
@@ -17,7 +17,6 @@ OneLab demonstrates a minimal but production-minded architecture for an AI-power
 6. Start server:
    - `python manage.py runserver`
 
-> You can run without an Anthropic key; LLM calls will return a safe placeholder message.
 
 ## Architecture (ASCII)
 
