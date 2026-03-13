@@ -18,7 +18,10 @@ OneLab demonstrates a minimal but production-minded architecture for an AI-power
    - `python manage.py runserver`
 
 
+
 ## System Architecture
+
+```text
                     ┌──────────────┐
                     │     User     │
                     └──────┬───────┘
@@ -54,6 +57,7 @@ OneLab demonstrates a minimal but production-minded architecture for an AI-power
             │ Learner Knowledge Graph   │
             │      (ConceptNode)        │
             └───────────────────────────┘
+```
 
 ## Research Paper Processing Pipeline
            ┌─────────────────────┐
