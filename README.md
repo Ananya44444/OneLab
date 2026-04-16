@@ -59,33 +59,8 @@ OneLab demonstrates a minimal but production-minded architecture for an AI-power
             └───────────────────────────┘
 ```
 
-## Research Paper Processing Pipeline
-           ┌─────────────────────┐
-           │   Paper Upload API  │
-           │      /research      │
-           └─────────┬───────────┘
-                     │
-                     ▼
-             ┌───────────────┐
-             │    PyMuPDF    │
-             │Text Extraction│
-             └──────┬────────┘
-                    │
-                    ▼
-             ┌───────────────┐
-             │   Chunking    │
-             └──────┬────────┘
-                    │
-                    ▼
-             ┌───────────────┐
-             │   Embedding   │
-             │ Generation    │
-             └──────┬────────┘
-                    │
-                    ▼
-             ┌───────────────┐
-             │   ChromaDB    │
-             │embed_and_store│
+
+   
              └──────┬────────┘
                     │
                     ▼
