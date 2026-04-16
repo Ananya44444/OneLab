@@ -61,10 +61,4 @@ OneLab demonstrates a minimal but production-minded architecture for an AI-power
 
 
    
-             └──────┬────────┘
-                    │
-                    ▼
-             ┌───────────────┐
-             │ Paper Summary │
-             │   Generation  │
-             └───────────────┘
+        
